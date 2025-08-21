@@ -46,19 +46,54 @@ class BinarySearchTree:
             return True
         return result
     
-    def validate(self):
-        return self._validate(self.root, float("-inf"), float("inf"))
+    def validation(self):
+        return self._validation(self.root, float('-inf'), float('inf'))
     
-    def _validate(self, node, low, high):
-        if node is None:
+    def _validation(self, root, min_value, max_value):
+        if root is None:
             return True
-        # cho phép trùng ở nhánh phải => low <= value < high
-        if not (low <= node.value < high):
+        if root.value < min_value or root.value >= max_value:
             return False
-        return (self._validate(node.left, low, node.value) and
-                self._validate(node.right, node.value, high))
+        left_check = self._validation(root.left, min_value, root.value)
+        if left_check:
+            right_check = self._validation(root.right, root.value, max_value)
+            return right_check
+        return False
     
-
+    def delete(self, key):
+        self.root = self._delete(key, self.root)
+    
+    def _delete(self, key, root):
+        if root is None: # base case
+            return None
+        if key > root.value:
+            root.right = self._delete(key, root.right)
+        elif key < root.value:
+            root.left = self._delete(key, root.left)
+        else: # key == value
+            # node is leaf
+            if root.left is None and root.right is None:
+                return None
+            # node has at least 1 child
+            else:
+                # node has 1 child
+                if root.right is None:
+                    return root.left
+                elif root.left is None:
+                    return root.right
+                else:  # node has 2 children
+                    # replace with left subtree's max value
+                    root.value = self.findMax(root.left)
+                    # delete duplicate node in left subtree
+                    root.left = self._delete(root.value, root.left)
+        return root
+    
+    def findMax(self, root):
+        current = root
+        while current.right is not None:
+            current = current.right
+        return current.value
+                
 
 if __name__ == "__main__":
     bst = BinarySearchTree()
@@ -69,8 +104,15 @@ if __name__ == "__main__":
     bst.insert(25)
     bst.insert(5)
     
+    bst2 = BinarySearchTree()
+    bst2.root = Node(10)
+    bst2.root.left = Node(10)
+    
     bst.inorder()
     print()
     print(bst.search(15))
-
+    print(bst2.validation())
+    
+    bst.delete(22)
+    bst.inorder()
     
